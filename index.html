@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laboratório 2 - Game de Python - Prof. Danny (100 desafios)</title>
+<meta name="description" content="Jogo de lacunas em Python (100 desafios) com operações aritméticas, if/else e tipos básicos. Avance apenas ao acertar a lacuna." />
+<style>
+  :root{
+    /* Paleta toda em AZUL */
+    --bg1:#0F2D45;        /* Fundo principal */
+    --bg2:#143a57;
+    --bg3:#1a486d;
+    --card:#ffffff;       /* Cartões/branco */
+    --paper:#f3f7fb;      /* Papel azulado claro */
+    --ink:#0b2033;        /* Texto */
+    --muted:#5e7e98;      /* Texto secundário em azul acinzentado */
+
+    --accent:#3b82f6;     /* Azul de ação */
+    --accent2:#60a5fa;    /* Azul claro */
+    --ok:#2563eb;         /* Azul de sucesso */
+    --bad:#1e40af;        /* Azul-escuro para erro (mantendo tudo azul) */
+  }
+  *{box-sizing:border-box}
+  html,body{
+    margin:0;padding:0;
+    background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2) 40%,var(--bg3) 100%);
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Noto Sans',sans-serif;
+    color:#fff
+  }
+  .wrap{max-width:1000px;margin:32px auto;padding:0 16px}
+  header{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px
+  }
+  header h1{margin:0;font-size:clamp(22px,3.4vw,32px);line-height:1.15}
+  header .mini{opacity:.95;font-size:14px}
+  .pill{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;
+    background:rgba(255,255,255,.12);font-weight:700
+  }
+  .card{
+    background:var(--card);color:var(--ink);border-radius:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);padding:18px
+  }
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .left{flex:1 1 580px;min-width:280px}
+  .right{flex:1 1 300px;min-width:240px}
+  .panel{background:var(--paper);border-radius:16px;padding:14px;border:1px solid #e2ebf5}
+  .meta{display:flex;align-items:center;gap:10px;margin:0 0 10px 0;color:var(--muted)}
+  .progress{height:10px;background:#e6eef8;border-radius:999px;overflow:hidden}
+  .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .35s ease}
+  .title{font-weight:700;font-size:18px;margin:8px 0 4px}
+  pre{
+    margin:0;background:#0b1220;color:#dbeafe;border-radius:12px;
+    padding:14px;overflow:auto;line-height:1.35;border:1px solid #0f1a2e
+  }
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+  .blank{background:#fff;border:2px dashed #bed3f1;border-radius:12px;padding:10px;display:flex;gap:8px;align-items:center}
+  .blank input{
+    flex:1;border:1.5px solid #c7d8f5;border-radius:10px;padding:10px 12px;
+    font-size:16px;outline:none
+  }
+  .blank input:focus{border-color:#93c5fd;box-shadow:0 0 0 3px #dbeafe}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    appearance:none;border:0;border-radius:999px;padding:10px 16px;
+    background:#1f2937;color:#fff;font-weight:700;cursor:pointer
+  }
+  .btn:disabled{opacity:.35;cursor:not-allowed}
+  .btn.ok{background:var(--accent);color:#082345}
+  .btn.ghost{background:#e5ecf8;color:#0f2038}
+  .status{min-height:28px;display:flex;align-items:center;gap:8px;font-weight:700}
+  .status.ok{color:var(--ok)} .status.bad{color:var(--bad)}
+  .muted{color:var(--muted);font-size:13px}
+  .footer{
+    margin-top:14px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;color:#cfe0f4
+  }
+  .confetti{position:fixed;inset:0;pointer-events:none;display:none}
+  @media (max-width:700px){ .right{order:-1} }
+</style>
+</head>
+<body>
+<canvas class="confetti" id="confetti"></canvas>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Laboratório 2 - Game de Python - Prof. Danny</h1>
+      <div class="mini">Operações aritméticas · if/else · tipos básicos · <strong>100 desafios</strong> • Progresso salvo no navegador</div>
+    </div>
+    <div class="pill" id="pillProgresso">Fase 1/100</div>
+  </header>
+
+  <div class="row">
+    <section class="left card">
+      <div class="meta">
+        <span id="etiqueta">Desafio 1</span> ·
+        <span id="nivel" class="muted">básico</span>
+      </div>
+
+      <div class="title" id="titulo">Complete a operação</div>
+      <p id="enunciado" class="muted" style="margin-top:0"></p>
+
+      <div class="panel" style="margin:12px 0">
+        <pre><code id="codigo">print(2 ___ 3)</code></pre>
+      </div>
+
+      <div class="blank">
+        <span>Preencha a lacuna:</span>
+        <input id="resposta" type="text" inputmode="text" autocomplete="off" placeholder="ex.: +, -, *, /, //, %, **, ==, if, else, int, and, or, not">
+      </div>
+
+      <div class="actions" style="margin-top:12px">
+        <button class="btn" id="verificar">Verificar</button>
+        <button class="btn ok" id="proximo" disabled>Próximo ▶</button>
+        <button class="btn ghost" id="reiniciar">Reiniciar progresso</button>
+      </div>
+
+      <div class="status" id="status"></div>
+      <div class="muted">As respostas são **sensíveis a maiúsculas/minúsculas** (Python diferencia <code>True</code> de <code>true</code>). Não use acentos nas respostas.</div>
+    </section>
+
+    <aside class="right card">
+      <div class="title">Progresso</div>
+      <div class="panel">
+        <div class="progress"><div class="bar" id="bar"></div></div>
+        <div class="muted" style="margin-top:8px">
+          <strong id="pct">0%</strong> concluído • <span id="contagem">0 de 100 certos</span>
+        </div>
+      </div>
+
+      <div class="title" style="margin-top:14px">Regras</div>
+      <ul class="muted" style="margin:8px 0 0 18px">
+        <li>Apenas avança se acertar a lacuna.</li>
+        <li>Tente quantas vezes quiser; não há penalidade por erros.</li>
+        <li>Progresso salvo automaticamente (neste navegador).</li>
+      </ul>
+    </aside>
+  </div>
+
+  <div class="footer">
+    <div>© Laboratório 2 — Game de Python • Disciplina de Data Science</div>
+    <div class="muted">Versão: 2.0 • 100 desafios</div>
+  </div>
+</div>
+
+<script>
+/* =========================
+   BANCO DE DESAFIOS (100)
+   - Cada objeto possui: titulo, nivel, enunciado, snippet (usa "___"), resposta
+   - Últimos 15 com if/else mais desafiadores (and/or/not, composições, etc.)
+   ========================= */
+const desafios = [
+  // --------- Básico (1-40) ----------
+  {titulo:"Soma",nivel:"básico",enunciado:"Some 2 e 3.",snippet:`print(2 ___ 3)`,resposta:"+"},
+  {titulo:"Subtração",nivel:"básico",enunciado:"Subtraia 4 de 10.",snippet:`print(10 ___ 4)`,resposta:"-"},
+  {titulo:"Multiplicação",nivel:"básico",enunciado:"Multiplique 7 por 6.",snippet:`print(7 ___ 6)`,resposta:"*"},
+  {titulo:"Divisão",nivel:"básico",enunciado:"Divida 8 por 2 (resultado 4).",snippet:`print(8 ___ 2)`,resposta:"/"},
+  {titulo:"Divisão inteira",nivel:"básico",enunciado:"Divida 7 por 2 sem casas decimais.",snippet:`print(7 ___ 2)`,resposta:"//"},
+  {titulo:"Módulo",nivel:"básico",enunciado:"Resto de 10 por 3.",snippet:`print(10 ___ 3)`,resposta:"%"},
+  {titulo:"Potência",nivel:"básico",enunciado:"2 ao cubo (8).",snippet:`print(2 ___ 3)`,resposta:"**"},
+  {titulo:"Sinal negativo",nivel:"básico",enunciado:"Torne -5 a partir de 0 e 5.",snippet:`print(0 ___ 5)`,resposta:"-"},
+  {titulo:"Dobro",nivel:"básico",enunciado:"Calcule o dobro de 9.",snippet:`print(9 ___ 2)`,resposta:"*"},
+  {titulo:"Paridade (módulo)",nivel:"básico",enunciado:"Use resto para checar se 9 é ímpar (resto 1).",snippet:`print(9 ___ 2)`,resposta:"%"},
+  {titulo:"Igualdade",nivel:"básico",enunciado:"Compare 5 e 5 para True.",snippet:`print(5 ___ 5)`,resposta:"=="},
+  {titulo:"Diferença",nivel:"básico",enunciado:"Compare 5 e 3 (True).",snippet:`print(5 ___ 3)`,resposta:"!="},
+  {titulo:"Maior que",nivel:"básico",enunciado:"8 é maior que 2.",snippet:`print(8 ___ 2)`,resposta:">"},
+  {titulo:"Menor que",nivel:"básico",enunciado:"2 é menor que 8.",snippet:`print(2 ___ 8)`,resposta:"<"},
+  {titulo:"Maior ou igual",nivel:"básico",enunciado:"3 é maior ou igual a 3.",snippet:`print(3 ___ 3)`,resposta:">="},
+  {titulo:"Menor ou igual",nivel:"básico",enunciado:"2 é menor ou igual a 2.",snippet:`print(2 ___ 2)`,resposta:"<="},
+  {titulo:"String igual",nivel:"básico",enunciado:`"Ana" igual a "Ana".`,snippet:`print("Ana" ___ "Ana")`,resposta:"=="},
+  {titulo:"String diferente",nivel:"básico",enunciado:`"azul" diferente de "vermelho".`,snippet:`print("azul" ___ "vermelho")`,resposta:"!="},
+  {titulo:"If básico",nivel:"básico",enunciado:"Complete a palavra-chave.",snippet:`___ 10 > 3:\n    print("ok")`,resposta:"if"},
+  {titulo:"Else básico",nivel:"básico",enunciado:"Complete o caminho alternativo.",snippet:`x = -1\nif x > 0:\n    print("positivo")\n___:\n    print("não positivo")`,resposta:"else"},
+  {titulo:"Condição de igualdade em if",nivel:"básico",enunciado:"Compare nome com 'Ana'.",snippet:`nome = "Ana"\nif nome ___ "Ana":\n    print("Olá")`,resposta:"=="},
+  {titulo:"Condição de diferença em if",nivel:"básico",enunciado:"Verifique se n é diferente de 2.",snippet:`n = 3\nif n ___ 2:\n    print("diferente")`,resposta:"!="},
+  {titulo:"Par (módulo no if)",nivel:"básico",enunciado:"Use % para checar se n é par.",snippet:`n = 8\nif n ___ 2 == 0:\n    print("par")\nelse:\n    print("ímpar")`,resposta:"%"},
+  {titulo:"Converter para int",nivel:"básico",enunciado:"Converta '42' para inteiro.",snippet:`s = "42"\nidade = ___(s)`,resposta:"int"},
+  {titulo:"Converter para float",nivel:"básico",enunciado:"Converta '3.14' para float.",snippet:`s = "3.14"\npi = ___(s)`,resposta:"float"},
+  {titulo:"Converter para string",nivel:"básico",enunciado:"Converta número em texto.",snippet:`ano = 2025\nprint("Ano: " + ___(ano))`,resposta:"str"},
+  {titulo:"Tamanho de texto",nivel:"básico",enunciado:"Tamanho de 'Danny' (5).",snippet:`nome = "Danny"\nqtd = ___(nome)`,resposta:"len"},
+  {titulo:"Tipo de dado",nivel:"básico",enunciado:"Tipo de 3 é int.",snippet:`print(___(3) == int)`,resposta:"type"},
+  {titulo:"Booleano True",nivel:"básico",enunciado:"Atribua verdadeiro.",snippet:`ativo = ___\nif ativo:\n    print("ok")`,resposta:"True"},
+  {titulo:"Booleano False",nivel:"básico",enunciado:"Atribua falso.",snippet:`chovendo = ___\nif chovendo == False:\n    print("sair")`,resposta:"False"},
+  {titulo:"Imprimir texto",nivel:"básico",enunciado:"Função que exibe no console.",snippet:`___("Olá, mundo!")`,resposta:"print"},
+  {titulo:"Maioridade (>=)",nivel:"básico",enunciado:"x é maior ou igual a 18.",snippet:`x = 18\nif x ___ 18:\n    print("maior de idade")`,resposta:">="},
+  {titulo:"Recuperação (<=)",nivel:"básico",enunciado:"nota é 6 ou menos.",snippet:`nota = 6\nif nota ___ 6:\n    print("recuperação")`,resposta:"<="},
+  {titulo:"Concatenação simples",nivel:"básico",enunciado:"Una com espaço.",snippet:`print("Data" ___ "Science")`,resposta:"+"},
+  {titulo:"Comparar após conversão",nivel:"básico",enunciado:"Converta para int e compare.",snippet:`valor = "9"\nif ___(valor) < 10:\n    print("ok")`,resposta:"int"},
+  {titulo:"Fechando com else",nivel:"básico",enunciado:"Complete o else final.",snippet:`x = 5\nif x > 5:\n    print("alto")\n___:\n    print("não alto")`,resposta:"else"},
+  {titulo:"Quadrado com **",nivel:"básico",enunciado:"3 ao quadrado (9).",snippet:`print(3 ___ 2)`,resposta:"**"},
+  {titulo:"Triplo com *",nivel:"básico",enunciado:"Triplique 4.",snippet:`print(4 ___ 3)`,resposta:"*"},
+  {titulo:"Resto zero",nivel:"básico",enunciado:"10 é múltiplo de 5 (resto 0).",snippet:`print(10 ___ 5)`,resposta:"%"},
+  {titulo:"Divisão com /",nivel:"básico",enunciado:"9/3 é 3.0.",snippet:`print(9 ___ 3)`,resposta:"/"},
+  {titulo:"Divisão inteira //",nivel:"básico",enunciado:"9//4 é 2.",snippet:`print(9 ___ 4)`,resposta:"//"},
+
+  // --------- Intermediário (41-85) ----------
+  {titulo:"Comparar floats",nivel:"intermediário",enunciado:"3.0 igual a 3?",snippet:`print(3.0 ___ 3)`,resposta:"=="},
+  {titulo:"Comparar textos",nivel:"intermediário",enunciado:`"py" diferente de "python"?`,snippet:`print("py" ___ "python")`,resposta:"!="},
+  {titulo:"If com >= ",nivel:"intermediário",enunciado:"y >= 100 ativa bônus.",snippet:`y = 100\nif y ___ 100:\n    print("bônus")`,resposta:">="},
+  {titulo:"If com <",nivel:"intermediário",enunciado:"x < 0 é negativo.",snippet:`x = -2\nif x ___ 0:\n    print("negativo")`,resposta:"<"},
+  {titulo:"Comparação encadeada (parte 1)",nivel:"intermediário",enunciado:"Use > para maior.",snippet:`a=10;b=5\nprint(a ___ b)`,resposta:">"},
+  {titulo:"Comparação encadeada (parte 2)",nivel:"intermediário",enunciado:"Use <= para menor/igual.",snippet:`a=2;b=2\nprint(a ___ b)`,resposta:"<="},
+  {titulo:"Len em if",nivel:"intermediário",enunciado:`Se len("AI") == 2 imprime ok.`,snippet:`if ___("AI") == 2:\n    print("ok")`,resposta:"len"},
+  {titulo:"Type em if",nivel:"intermediário",enunciado:"Verifique se t é int.",snippet:`t = 7\nif ___(t) == int:\n    print("inteiro")`,resposta:"type"},
+  {titulo:"String conversão",nivel:"intermediário",enunciado:"Converta 55 em texto.",snippet:`n=55\nmsg="N=" + ___(n)`,resposta:"str"},
+  {titulo:"Float conversão",nivel:"intermediário",enunciado:"Converta '8' para float.",snippet:`s="8"\nv = ___(s)`,resposta:"float"},
+  {titulo:"If simples com True",nivel:"intermediário",enunciado:"Ative com True.",snippet:`flag = ___\nif flag:\n    print("ligado")`,resposta:"True"},
+  {titulo:"If simples com False",nivel:"intermediário",enunciado:"Cheque falso.",snippet:`ok = ___\nif ok == False:\n    print("desligado")`,resposta:"False"},
+  {titulo:"Impressão numérica",nivel:"intermediário",enunciado:"Imprima 123.",snippet:`___(123)`,resposta:"print"},
+  {titulo:"Comparar strings em if",nivel:"intermediário",enunciado:"nome é 'Danny'?",snippet:`nome="Danny"\nif nome ___ "Danny":\n    print("oi")`,resposta:"=="},
+  {titulo:"Não igual em if",nivel:"intermediário",enunciado:"cor não é 'verde'?",snippet:`cor="azul"\nif cor ___ "verde":\n    print("ok")`,resposta:"!="},
+  {titulo:"Maioridade 21",nivel:"intermediário",enunciado:"idade >= 21.",snippet:`idade=21\nif idade ___ 21:\n    print("ok")`,resposta:">="},
+  {titulo:"Limite inferior",nivel:"intermediário",enunciado:"x <= 10.",snippet:`x=10\nif x ___ 10:\n    print("ok")`,resposta:"<="},
+  {titulo:"Par com if",nivel:"intermediário",enunciado:"n % 2 == 0.",snippet:`n=12\nif n ___ 2 == 0:\n    print("par")`,resposta:"%"},
+  {titulo:"Ímpar com if",nivel:"intermediário",enunciado:"n % 2 != 0.",snippet:`n=9\nif n ___ 2 != 0:\n    print("ímpar")`,resposta:"%"},
+  {titulo:"Divisão inteira em if",nivel:"intermediário",enunciado:"7//2 == 3.",snippet:`if (7 ___ 2) == 3:\n    print("ok")`,resposta:"//"},
+  {titulo:"Potência em if",nivel:"intermediário",enunciado:"2**5 == 32.",snippet:`if (2 ___ 5) == 32:\n    print("ok")`,resposta:"**"},
+  {titulo:"Comparar após int()",nivel:"intermediário",enunciado:"int('6') > 5.",snippet:`if ___("6") > 5:\n    print("ok")`,resposta:"int"},
+  {titulo:"Comparar após float()",nivel:"intermediário",enunciado:"float('2.5') < 3.",snippet:`if ___("2.5") < 3:\n    print("ok")`,resposta:"float"},
+  {titulo:"Concatenação com número",nivel:"intermediário",enunciado:"'Ano: ' + str(2025).",snippet:`print("Ano: " + ___(2025))`,resposta:"str"},
+  {titulo:"Checar len em if",nivel:"intermediário",enunciado:"len('abc') == 3.",snippet:`if ___("abc") == 3:\n    print("tres")`,resposta:"len"},
+  {titulo:"Checar type em if",nivel:"intermediário",enunciado:"type(3)==int.",snippet:`if ___(3) == int:\n    print("int")`,resposta:"type"},
+  {titulo:"Maior que em if",nivel:"intermediário",enunciado:"9 > 1.",snippet:`if 9 ___ 1:\n    print("ok")`,resposta:">"},
+  {titulo:"Menor que em if",nivel:"intermediário",enunciado:"1 < 9.",snippet:`if 1 ___ 9:\n    print("ok")`,resposta:"<"},
+  {titulo:"Diferente em if",nivel:"intermediário",enunciado:"5 != 4.",snippet:`if 5 ___ 4:\n    print("ok")`,resposta:"!="},
+  {titulo:"Igual em if",nivel:"intermediário",enunciado:"2 == 2.",snippet:`if 2 ___ 2:\n    print("ok")`,resposta:"=="},
+  {titulo:"Else caminho",nivel:"intermediário",enunciado:"Complete o else.",snippet:`n=-3\nif n>0:\n    print("positivo")\n___:\n    print("não positivo")`,resposta:"else"},
+  {titulo:"If palavra",nivel:"intermediário",enunciado:"Complete 'if'.",snippet:`___ 3<5:\n    print("ok")`,resposta:"if"},
+  {titulo:"Comparar strings (maiúsc/minúsc)",nivel:"intermediário",enunciado:`"A" < "a" em Unicode? Use <.`,snippet:`print("A" ___ "a")`,resposta:"<"},
+  {titulo:"Resto com 3",nivel:"intermediário",enunciado:"15 é múltiplo de 3.",snippet:`print(15 ___ 3)`,resposta:"%"},
+  {titulo:"Resto com 4",nivel:"intermediário",enunciado:"16 % 4 == 0.",snippet:`if 16 ___ 4 == 0:\n    print("ok")`,resposta:"%"},
+  {titulo:"Divisão inteira positiva",nivel:"intermediário",enunciado:"20//3 == 6.",snippet:`print(20 ___ 3)`,resposta:"//"},
+  {titulo:"Comparar após str()",nivel:"intermediário",enunciado:"'7' == str(7).",snippet:`print(___(7) == "7")`,resposta:"str"},
+  {titulo:"True em if",nivel:"intermediário",enunciado:"Use True.",snippet:`flag=___\nif flag:\n    print("go")`,resposta:"True"},
+  {titulo:"False em comparação",nivel:"intermediário",enunciado:"Compare com False.",snippet:`ativo=False\nprint(ativo ___ True)`,resposta:"!="},
+  {titulo:"Maior/igual",nivel:"intermediário",enunciado:"4>=4.",snippet:`print(4 ___ 4)`,resposta:">="},
+  {titulo:"Menor/igual",nivel:"intermediário",enunciado:"6<=7.",snippet:`print(6 ___ 7)`,resposta:"<="},
+  {titulo:"If/else numérico",nivel:"intermediário",enunciado:"Complete else.",snippet:`n=0\nif n>0:\n    print("positivo")\n___:\n    print("zero ou negativo")`,resposta:"else"},
+
+  // Mais prática (61-85) — ainda dentro do escopo, repetindo padrões úteis
+  {titulo:"Par com comparação",nivel:"intermediário",enunciado:"n%2==0.",snippet:`n=14\nprint(n ___ 2 == 0)`,resposta:"%"},
+  {titulo:"Ímpar com comparação",nivel:"intermediário",enunciado:"n%2!=0.",snippet:`n=15\nprint(n ___ 2 != 0)`,resposta:"%"},
+  {titulo:"Triplo igual a 21",nivel:"intermediário",enunciado:"7*3==21.",snippet:`print(7 ___ 3 == 21)`,resposta:"*"},
+  {titulo:"Metade igual a 5.0",nivel:"intermediário",enunciado:"10/2==5.0.",snippet:`print(10 ___ 2 == 5.0)`,resposta:"/"},
+  {titulo:"Metade inteira igual a 5",nivel:"intermediário",enunciado:"10//2==5.",snippet:`print(10 ___ 2 == 5)`,resposta:"//"},
+  {titulo:"Potência 2**4==16",nivel:"intermediário",enunciado:"Preencha **.",snippet:`print(2 ___ 4 == 16)`,resposta:"**"},
+  {titulo:"Comparar nomes",nivel:"intermediário",enunciado:"'Ana'=='Ana'.",snippet:`print("Ana" ___ "Ana")`,resposta:"=="},
+  {titulo:"Comparar nomes 2",nivel:"intermediário",enunciado:"'Ana'!='Bob'.",snippet:`print("Ana" ___ "Bob")`,resposta:"!="},
+  {titulo:"If >= com conversão",nivel:"intermediário",enunciado:"int('18')>=18.",snippet:`if ___("18") >= 18:\n    print("ok")`,resposta:"int"},
+  {titulo:"If <= com conversão",nivel:"intermediário",enunciado:"float('7.0')<=7.",snippet:`if ___("7.0") <= 7:\n    print("ok")`,resposta:"float"},
+  {titulo:"Len em comparação direta",nivel:"intermediário",enunciado:"len('abcd')==4.",snippet:`print(___("abcd") == 4)`,resposta:"len"},
+  {titulo:"Type em comparação direta",nivel:"intermediário",enunciado:"type('x')==str.",snippet:`print(___("x") == str)`,resposta:"type"},
+  {titulo:"If com > e else",nivel:"intermediário",enunciado:"Complete else.",snippet:`x=1\nif x>2:\n    print("alto")\n___:\n    print("baixo")`,resposta:"else"},
+  {titulo:"If palavra 2",nivel:"intermediário",enunciado:"Complete 'if'.",snippet:`___ 5>=5:\n    print("ok")`,resposta:"if"},
+  {titulo:"Comparar >= direto",nivel:"intermediário",enunciado:"9>=9.",snippet:`print(9 ___ 9)`,resposta:">="},
+  {titulo:"Comparar < direto",nivel:"intermediário",enunciado:"2<3.",snippet:`print(2 ___ 3)`,resposta:"<"},
+  {titulo:"Resto com 10%3",nivel:"intermediário",enunciado:"10%3==1.",snippet:`print(10 ___ 3 == 1)`,resposta:"%"},
+  {titulo:"Resto com 12%4",nivel:"intermediário",enunciado:"12%4==0.",snippet:`print(12 ___ 4 == 0)`,resposta:"%"},
+  {titulo:"Divisão 9/3",nivel:"intermediário",enunciado:"9/3==3.0.",snippet:`print(9 ___ 3 == 3.0)`,resposta:"/"},
+  {titulo:"Divisão inteira 9//3",nivel:"intermediário",enunciado:"9//3==3.",snippet:`print(9 ___ 3 == 3)`,resposta:"//"},
+  {titulo:"Potência 3**3",nivel:"intermediário",enunciado:"3**3==27.",snippet:`print(3 ___ 3 == 27)`,resposta:"**"},
+  {titulo:"Concat com número",nivel:"intermediário",enunciado:"'Idade: '+str(30).",snippet:`print("Idade: " + ___(30))`,resposta:"str"},
+  {titulo:"Comparar após str 2",nivel:"intermediário",enunciado:"str(5)=='5'.",snippet:`print(___(5) == "5")`,resposta:"str"},
+  {titulo:"Bool True check",nivel:"intermediário",enunciado:"True==True.",snippet:`print(True ___ True)`,resposta:"=="},
+  {titulo:"Bool False check",nivel:"intermediário",enunciado:"False!=True.",snippet:`print(False ___ True)`,resposta:"!="},
+
+  // --------- Difícil (86-100) — if/else mais desafiadores ----------
+  {titulo:"Intervalo fechado [0,10]",nivel:"difícil",enunciado:"x está entre 0 e 10.",snippet:`x=7\nif x >= 0 ___ x <= 10:\n    print("dentro")\nelse:\n    print("fora")`,resposta:"and"},
+  {titulo:"Fora do intervalo",nivel:"difícil",enunciado:"x menor que 0 ou maior que 10.",snippet:`x=12\nif x < 0 ___ x > 10:\n    print("fora")\nelse:\n    print("dentro")`,resposta:"or"},
+  {titulo:"Não chovendo",nivel:"difícil",enunciado:"Use negação na condição.",snippet:`chovendo=False\nif ___ chovendo:\n    print("sair")\nelse:\n    print("ficar")`,resposta:"not"},
+  {titulo:"Maior de idade e estudante",nivel:"difícil",enunciado:"Ambas condições verdadeiras.",snippet:`idade=19;estudante=True\nif idade >= 18 ___ estudante == True:\n    print("meia-entrada")\nelse:\n    print("inteira")`,resposta:"and"},
+  {titulo:"Chuva ou trânsito",nivel:"difícil",enunciado:"Qualquer um ativa alerta.",snippet:`chuva=True;transito=False\nif chuva == True ___ transito == True:\n    print("alerta")\nelse:\n    print("ok")`,resposta:"or"},
+  {titulo:"Par e múltiplo de 3",nivel:"difícil",enunciado:"Ambas condições.",snippet:`x=12\nif x % 2 == 0 ___ x % 3 == 0:\n    print("par e múltiplo de 3")\nelse:\n    print("não atende")`,resposta:"and"},
+  {titulo:"Senha correta e ativo",nivel:"difícil",enunciado:"Duas condições verdadeiras.",snippet:`senha="1234";ativo=True\nif senha == "1234" ___ ativo == True:\n    print("acesso")\nelse:\n    print("negado")`,resposta:"and"},
+  {titulo:"Idade não igual a 18",nivel:"difícil",enunciado:"Negue igualdade com not.",snippet:`idade=20\nif ___ (idade == 18):\n    print("diferente de 18")\nelse:\n    print("igual a 18")`,resposta:"not"},
+  {titulo:"Comparar duas condições",nivel:"difícil",enunciado:"x>y ou y>z.",snippet:`x=5;y=2;z=8\nif x > y ___ y > z:\n    print("condição")\nelse:\n    print("outra")`,resposta:"or"},
+  {titulo:"Média aprova",nivel:"difícil",enunciado:"media>=7 e faltas==0.",snippet:`media=7;faltas=0\nif media >= 7 ___ faltas == 0:\n    print("aprovado")\nelse:\n    print("pendente")`,resposta:"and"},
+  {titulo:"Login bloqueado",nivel:"difícil",enunciado:"senha errada ou inativo.",snippet:`senha_ok=False;ativo=False\nif senha_ok == False ___ ativo == False:\n    print("bloqueado")\nelse:\n    print("liberado")`,resposta:"or"},
+  {titulo:"Dentro ou borda",nivel:"difícil",enunciado:"0<=x<=100.",snippet:`x=100\nif x >= 0 ___ x <= 100:\n    print("válido")\nelse:\n    print("inválido")`,resposta:"and"},
+  {titulo:"Divisão inteira na condição",nivel:"difícil",enunciado:"7//2==3 no if.",snippet:`if (7 ___ 2) == 3:\n    print("ok")\nelse:\n    print("x")`,resposta:"//"},
+  {titulo:"Múltiplo de 5 e não de 2",nivel:"difícil",enunciado:"Use and + not.",snippet:`n=15\nif n % 5 == 0 ___ (___ (n % 2 == 0)):\n    print("ok")\nelse:\n    print("x")`,resposta:"and|not"}, // especial: resolvemos com checagem dupla no código (ver abaixo)
+  {titulo:"Par ou maior de 100",nivel:"difícil",enunciado:"Use or.",snippet:`n=101\nif n % 2 == 0 ___ n > 100:\n    print("ok")\nelse:\n    print("x")`,resposta:"or"}
+];
+
+// >>>> Observação importante para o desafio que cita duas lacunas (and + not):
+// Para manter a regra "uma lacuna por desafio", usamos um pequeno truque:
+// - Na definição acima, resposta: "and|not" (um 'pipe' para indicar duas respostas válidas).
+// - No mecanismo de verificação, aceitamos "and" OU "not" conforme a posição do marcador especial "__SPECIAL__".
+// Para simplificar a experiência do aluno e manter “uma lacuna”, vamos reescrever dinamicamente o snippet
+// colocando apenas UMA lacuna ativa de cada vez (primeiro 'and', depois 'not'), alternando quando o aluno avança.
+// Contudo, para não complicar, adotaremos uma abordagem mais simples:
+//   > No carregamento, substituiremos o segundo marcador por seu texto (fixo) e manteremos só UMA lacuna real.
+//   > Aqui, escolheremos manter a lacuna para 'and' e fixaremos 'not' no texto.
+//   > Assim, a resposta correta será apenas 'and'. (A string "and|not" será tratada como 'and'.)
+
+for (let i = 0; i < desafios.length; i++) {
+  if (typeof desafios[i].resposta === "string" && desafios[i].resposta.includes("|")) {
+    // fixa a segunda parte no snippet e mantém apenas 'and' como lacuna
+    desafios[i].snippet = desafios[i].snippet.replace("___ (___ (n % 2 == 0))", "___ (not (n % 2 == 0))");
+    desafios[i].resposta = desafios[i].resposta.split("|")[0]; // 'and'
+  }
+}
+
+// ---------- Estado & elementos ----------
+const elTitulo = document.getElementById('titulo');
+const elEnun   = document.getElementById('enunciado');
+const elCodigo = document.getElementById('codigo');
+const elResp   = document.getElementById('resposta');
+const elVerif  = document.getElementById('verificar');
+const elNext   = document.getElementById('proximo');
+const elReini  = document.getElementById('reiniciar');
+const elStatus = document.getElementById('status');
+const elBar    = document.getElementById('bar');
+const elPct    = document.getElementById('pct');
+const elCont   = document.getElementById('contagem');
+const elNiv    = document.getElementById('nivel');
+const elTag    = document.getElementById('etiqueta');
+const elPill   = document.getElementById('pillProgresso');
+const canvas   = document.getElementById('confetti');
+
+let indice = parseInt(localStorage.getItem('pythonquest_indice_v2')||'0',10);
+indice = isNaN(indice) ? 0 : Math.min(Math.max(indice,0), desafios.length-1);
+let acertados = parseInt(localStorage.getItem('pythonquest_acertos_v2')||'0',10);
+acertados = isNaN(acertados) ? 0 : Math.min(acertados, desafios.length);
+let liberado = false;
+
+// ---------- Utilitários ----------
+function salvar(){
+  localStorage.setItem('pythonquest_indice_v2', String(indice));
+  localStorage.setItem('pythonquest_acertos_v2', String(acertados));
+}
+function progressoUI(){
+  const pct = Math.round((Math.max(acertados, indice+1)/desafios.length)*100);
+  elBar.style.width = pct + '%';
+  elPct.textContent = pct + '%';
+  elCont.textContent = `${Math.max(acertados, indice+1)} de ${desafios.length} certos`;
+  elPill.textContent = `Fase ${Math.min(indice+1,desafios.length)}/${desafios.length}`;
+}
+function carregar(i){
+  const d = desafios[i];
+  elTag.textContent = `Desafio ${i+1}`;
+  elNiv.textContent = d.nivel || 'básico';
+  elTitulo.textContent = d.titulo;
+  elEnun.textContent = d.enunciado;
+  elCodigo.textContent = d.snippet;
+  elResp.value = '';
+  elResp.disabled = false;
+  elStatus.className = 'status';
+  elStatus.textContent = '';
+  liberado = false;
+  elNext.disabled = true;
+  elResp.focus();
+  progressoUI();
+}
+function normalizar(s){
+  return s.replace(/\s+/g,'').trim();
+}
+function verificar(){
+  const d = desafios[indice];
+  const entrada = elResp.value;
+  if(entrada.length === 0){
+    elStatus.className = 'status bad';
+    elStatus.textContent = 'Digite uma resposta antes de verificar.';
+    return;
+  }
+  const ok = normalizar(entrada) === normalizar(d.resposta);
+  if(ok){
+    if(!liberado){
+      liberado = true;
+      acertados = Math.max(acertados, indice+1);
+      salvar();
+    }
+    elStatus.className = 'status ok';
+    elStatus.textContent = '✔ Correto! Próxima fase liberada.';
+    estourarConfete(600);
+    elResp.disabled = true;
+    elNext.disabled = false;
+    progressoUI();
+    setTimeout(()=>{ if(!document.activeElement || document.activeElement !== elResp){ elNext.focus(); } }, 200);
+  }else{
+    elStatus.className = 'status bad';
+    elStatus.textContent = '✖ Resposta incorreta. Tente novamente!';
+    vibrar(120);
+  }
+}
+function proximo(){
+  if(!liberado) return;
+  if(indice < desafios.length-1){
+    indice++;
+    salvar();
+    carregar(indice);
+  }else{
+    finalizar();
+  }
+}
+function reiniciar(){
+  if(confirm("Isso apagará seu progresso salvo neste navegador. Deseja continuar?")){
+    indice = 0; acertados = 0; salvar(); carregar(indice);
+  }
+}
+function finalizar(){
+  elTitulo.textContent = "Parabéns! Você concluiu os 100 desafios.";
+  elEnun.textContent = "Você pode reiniciar o progresso para jogar novamente.";
+  elCodigo.textContent = `# Missão cumprida! 🏆\n# Continue praticando Python!`;
+  elResp.value = '';
+  elResp.disabled = true;
+  elNext.disabled = true;
+  elStatus.className = 'status ok';
+  elStatus.textContent = '🏅 Você finalizou todas as fases!';
+  progressoUI();
+  estourarConfete(1200);
+}
+
+// ---------- Efeitos (em AZUL) ----------
+function vibrar(ms=80){ if('vibrate' in navigator){ try{ navigator.vibrate(ms);}catch{} } }
+function estourarConfete(dur=900){
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = window.innerWidth;
+  const H = canvas.height = window.innerHeight;
+  const N = 140, p = [];
+  for(let i=0;i<N;i++){
+    p.push({
+      x: Math.random()*W,
+      y: -20-Math.random()*H*0.3,
+      r: 3+Math.random()*5,
+      vx: -1+Math.random()*2,
+      vy: 2+Math.random()*3,
+      a: Math.random()*Math.PI*2,
+      hue: 200 + Math.random()*40  // tons de azul
+    });
+  }
+  let start=null; canvas.style.display='block';
+  function tick(ts){
+    if(!start) start=ts;
+    const t = ts-start;
+    ctx.clearRect(0,0,W,H);
+    for(const o of p){
+      o.x += o.vx; o.y += o.vy; o.a += 0.1;
+      ctx.save();
+      ctx.translate(o.x,o.y); ctx.rotate(o.a);
+      ctx.fillStyle = `hsl(${o.hue},100%,60%)`;
+      ctx.fillRect(-o.r,-o.r,o.r*2,o.r*2);
+      ctx.restore();
+    }
+    if(t<dur) requestAnimationFrame(tick);
+    else canvas.style.display='none';
+  }
+  requestAnimationFrame(tick);
+}
+
+// ---------- Eventos ----------
+document.getElementById('verificar').addEventListener('click', verificar);
+document.getElementById('proximo').addEventListener('click', proximo);
+document.getElementById('reiniciar').addEventListener('click', reiniciar);
+document.getElementById('resposta').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ verificar(); } });
+
+// ---------- Inicialização ----------
+carregar(indice);
+</script>
+</body>
+</html>
